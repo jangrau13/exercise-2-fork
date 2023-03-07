@@ -15,6 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+import logging
+
 """
 Classes for representing a STRIPS planning task
 """
@@ -57,7 +59,13 @@ class Operator:
         @return True if the operator's preconditions is a subset of the state,
                 False otherwise
         """
-        return None # remove after implementing the method
+        intersection = frozenset.intersection(self.preconditions, state)
+        if len(intersection) == len(self.preconditions):
+            isSubset = True
+        else:
+            isSubset = False
+
+        return isSubset  # remove after implementing the method
 
     # ---- Step 2 ----
     # Implement the method
@@ -75,7 +83,9 @@ class Operator:
         @return A new state (set of predicates) after the application of the
                 operator
         """
-        return None # remove after implementing the method
+        newState = state - self.del_effects
+        newState = newState | self.add_effects
+        return newState # remove after implementing the method
 
     def __eq__(self, other):
         return (
@@ -132,7 +142,12 @@ class Task:
         @param state A state
         @return True if all the goals are reached, False otherwise
         """
-        return None # remove after implementing the method
+        intersection = frozenset.intersection(self.goals, state)
+        if len(intersection) == len(self.goals):
+            isReached = True
+        else:
+            isReached = False
+        return isReached
 
     # ---- Step 4 ----
     # Implement the method
@@ -150,7 +165,14 @@ class Task:
         operator and "new_state" the state that results when "op" is applied
         in state "state".
         """
-        return [] # remove after implementing the method
+        possible_next_states = []
+        for operator in self.operators:
+            if operator.applicable(state):
+                op = operator
+                new_state = operator.apply(state)
+                possible_next_states.append((op, new_state ))
+        return possible_next_states
+ # remove after implementing the method
 
     def __str__(self):
         s = "Task {0}\n  Vars:  {1}\n  Init:  {2}\n  Goals: {3}\n  Ops:   {4}"
